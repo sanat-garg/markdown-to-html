@@ -17,8 +17,8 @@
         .container {
             max-width: 800px;
             margin: 20px auto;
-            background-color: #fff;
             padding: 20px;
+            background-color: #fff;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
         }
@@ -26,24 +26,24 @@
         h1 {
             text-align: center;
             color: #0056b3;
+            margin-bottom: 20px;
         }
 
         textarea {
             width: 100%;
-            height: 300px;
+            height: 200px;
             padding: 10px;
             margin-bottom: 20px;
-            border: 1px solid #ddd;
+            border: 1px solid #ccc;
             border-radius: 4px;
             box-sizing: border-box;
             font-family: monospace;
             font-size: 14px;
-            resize: vertical;
         }
 
         #output {
             padding: 10px;
-            border: 1px solid #ddd;
+            border: 1px solid #ccc;
             border-radius: 4px;
             background-color: #f9f9f9;
             overflow: auto;
@@ -59,60 +59,142 @@
         code {
             font-family: monospace;
         }
-        
-        #markdown-word-count {
-            text-align: center;
-            font-size: 14px;
-            color: #777;
-            margin-top: -10px;
-            margin-bottom: 10px;
+
+        /* Syntax Highlighting Styles (highlight.js) */
+        .hljs {
+            display: block;
+            overflow-x: auto;
+            padding: 0.5em;
+            background: #f0f0f0;
         }
+
+        .hljs-comment,
+        .hljs-quote {
+            color: #8e908c;
+        }
+
+        .hljs-keyword,
+        .hljs-selector-tag,
+        .hljs-literal,
+        .hljs-subst {
+            color: #c6797e;
+        }
+
+        .hljs-number,
+        .hljs-attribute,
+        .hljs-doctag,
+        .hljs-meta .hljs-keyword {
+            color: #d08770;
+        }
+
+        .hljs-string,
+        .hljs-regexp,
+        .hljs-name,
+        .hljs-variable,
+        .hljs-template-literal,
+        .hljs-template-tag,
+        .hljs-symbol,
+        .hljs-bullet {
+            color: #a77e3c;
+        }
+
+        .hljs-title,
+        .hljs-section {
+            color: #dc3958;
+        }
+
+        .hljs-strong {
+            font-weight: bold;
+        }
+
+        .hljs-emphasis {
+            font-style: italic;
+        }
+
+        .header {
+            background-color: #0056b3;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            margin-bottom: 20px;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+        }
+		.header img {
+			max-height: 50px;
+			margin-right: 10px;
+		}
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="header">
+		<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAA..."/>
         <h1>Markdown to HTML Converter</h1>
-        <textarea id="markdown-input" placeholder="Enter Markdown here..."></textarea>
-        <div id="markdown-word-count">Word Count: 0</div>
+    </div>
+    <div class="container">
+        <textarea id="markdownInput" placeholder="Enter Markdown text here..."></textarea>
         <div id="output"></div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/default.min.css">
 
     <script>
-        const markdownInput = document.getElementById('markdown-input');
+        const markdownInput = document.getElementById('markdownInput');
         const outputDiv = document.getElementById('output');
-        const wordCountDiv = document.getElementById('markdown-word-count');
 
-        const convertMarkdownToHtml = (markdown) => {
-            const html = marked.parse(markdown);
+        function convertMarkdownToHtml(markdown) {
+            // Basic Markdown to HTML conversion (supports headings, paragraphs, bold, italic, lists, code)
+            let html = markdown
+                .replace(/^(#+) (.*)$/gm, (match, hashes, text) => `<h${hashes.length}>${text.trim()}</h${hashes.length}>`)
+                .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+                .replace(/\*(.*?)\*/g, '<i>$1</i>')
+                .replace(/`(.*?)`/g, '<code>$1</code>')
+                .replace(/^> (.*)$/gm, '<blockquote>$1</blockquote>')
+                .replace(/^[-+*] (.*)$/gm, '<li>$1</li>')
+                .replace(/^(\d+)\. (.*)$/gm, '<li>$2</li>')
+                .replace(/^<pre><code class="language-(.*?)">([\s\S]*?)<\/code><\/pre>/gm, (match, language, code) => {
+                    const highlightedCode = hljs.highlight(code, { language: language }).value;
+                    return `<pre><code class="hljs language-${language}">${highlightedCode}</code></pre>`;
+                })
+                .replace(/<\/code>\n<\/pre>/g, '</code></pre>')  // Fix for closing tag issue
+                .replace(/^```(.*?)\n([\s\S]*?)\n```/gm, (match, language, code) => {
+                    if (language) {
+                      try {
+                        const highlightedCode = hljs.highlight(code, { language: language }).value;
+                        return `<pre><code class="hljs language-${language}">${highlightedCode}</code></pre>`;
+                      } catch (e) {
+                          console.error("Error highlighting code:", e);
+                          return `<pre><code class="hljs">${code}</code></pre>`; // Fallback to no highlighting
+                      }
+                    } else {
+                      return `<pre><code class="hljs">${code}</code></pre>`;
+                    }
+                })
+                .replace(/\n/g, '<br>');
+
+            // Handle paragraphs
+            html = html.split('<br><br>').map(paragraph => {
+                if (paragraph.startsWith('<h') || paragraph.startsWith('<li') || paragraph.startsWith('<pre') || paragraph.startsWith('<blockquote')) {
+                    return paragraph;
+                } else if (paragraph.trim() !== ''){
+                  return '<p>' + paragraph + '</p>';
+                } else {
+                  return "";
+                }
+            }).join('<br><br>');
             return html;
-        };
+        }
 
-        const updateOutput = () => {
-            const markdownText = markdownInput.value;
-            const htmlOutput = convertMarkdownToHtml(markdownText);
-            outputDiv.innerHTML = htmlOutput;
-            document.querySelectorAll('pre code').forEach(el => {
-                hljs.highlightElement(el);
-            });
-            updateWordCount(markdownText);
-        };
+        markdownInput.addEventListener('input', function() {
+            outputDiv.innerHTML = convertMarkdownToHtml(this.value);
+        });
 
-        const updateWordCount = (text) => {
-            const words = text.trim().split(/\s+/).filter(word => word !== '');
-            const wordCount = words.length;
-            const numberFormat = new Intl.NumberFormat();
-            wordCountDiv.textContent = `Word Count: ${numberFormat.format(wordCount)}`;
-        };
+        // Initial highlight
+        outputDiv.innerHTML = convertMarkdownToHtml(markdownInput.value);
+        document.querySelectorAll('pre code').forEach(hljs.highlightElement);
 
-        markdownInput.addEventListener('input', updateOutput);
-
-        // Initial render
-        updateOutput();
     </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </body>
 </html>
