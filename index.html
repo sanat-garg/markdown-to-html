@@ -25,30 +25,33 @@
 
         h1 {
             text-align: center;
-            color: #007bff;
+            color: #0056b3;
         }
 
         textarea {
             width: 100%;
-            height: 200px;
+            height: 300px;
             padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
             border-radius: 4px;
-            box-sizing: border-box; /* Important for width calculation */
+            box-sizing: border-box;
             font-family: monospace;
+            font-size: 14px;
         }
 
         #markdown-output {
             padding: 10px;
-            border: 1px solid #ccc;
+            border: 1px solid #ddd;
             border-radius: 4px;
+            margin-bottom: 20px;
             background-color: #f9f9f9;
         }
 
         pre {
             background-color: #eee;
             padding: 10px;
+            border-radius: 4px;
             overflow-x: auto;
         }
 
@@ -56,67 +59,62 @@
             font-family: monospace;
         }
 
-        /* Highlight.js theme (e.g., Atom One Light) */
+        /* Syntax highlighting styles (using highlight.js default style) */
         .hljs {
             display: block;
             overflow-x: auto;
             padding: 0.5em;
-            background: #fafafa;
-            color: #383a42;
+            background: white;
+            color: black;
         }
 
         .hljs-comment,
         .hljs-quote {
-            color: #a0a1a7;
-            font-style: italic;
+            color: #8e908c;
         }
 
-        .hljs-doctag,
-        .hljs-keyword,
-        .hljs-meta .hljs-keyword,
-        .hljs-template-tag,
+        .hljs-variable,
         .hljs-template-variable,
-        .hljs-type,
-        .hljs-variable.language_ {
-            color: #983d06;
-        }
-
-        .hljs-name,
-        .hljs-selector-tag,
-        .hljs-tag {
-            color: #4078f2;
-        }
-
         .hljs-attribute,
-        .hljs-literal,
+        .hljs-tag,
+        .hljs-name,
+        .hljs-selector-id,
+        .hljs-selector-class,
+        .hljs-regexp,
+        .hljs-link {
+            color: #c82829;
+        }
+
         .hljs-number,
-        .hljs-operator,
-        .hljs-variable {
-            color: #986801;
+        .hljs-literal,
+        .hljs-symbol,
+        .hljs-bullet {
+            color: #f08d49;
+        }
+
+        .hljs-keyword,
+        .hljs-selector-tag {
+            color: #8959a8;
+        }
+
+        .hljs-string,
+        .hljs-title,
+        .hljs-section,
+        .hljs-built_in,
+        .hljs-doctag,
+        .hljs-type,
+        .hljs-class .hljs-title,
+        .hljs-function .hljs-title {
+            color: #718c00;
+        }
+
+        .hljs-params {
+            color: #3e999f;
         }
 
         .hljs-meta,
-        .hljs-string,
-        .hljs-symbol,
-        .hljs-template-string {
-            color: #50a14f;
-        }
-
-        .hljs-built_in,
-        .hljs-class .hljs-title,
-        .hljs-title.class_,
-        .hljs-title.function_ {
-            color: #c18401;
-        }
-
-        .hljs-section,
-        .hljs-title {
-            color: #383a42;
-            font-weight: bold;
-        }
-
-        .hljs-regexp {
-            color: #983d06;
+        .hljs-meta-string {
+            color: #4271ae;
         }
 
         .hljs-emphasis {
@@ -127,49 +125,106 @@
             font-weight: bold;
         }
 
-        .hljs-link {
-            text-decoration: underline;
+        .markdown-tabs {
+            display: flex;
+            margin-bottom: 10px;
         }
 
-        /* Responsive Design */
-        @media (max-width: 600px) {
-            .container {
-                padding: 10px;
-                margin: 10px auto;
-            }
-
-            textarea {
-                height: 150px;
-            }
+        .markdown-tabs button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #ddd;
+            cursor: pointer;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
         }
+
+        .markdown-tabs button.active {
+            background-color: #fff;
+        }
+
+        #markdown-output,
+        #markdown-source {
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            background-color: #f9f9f9;
+            display: none; /* Initially hide both */
+            white-space: pre-wrap;
+        }
+
+        #markdown-output.active,
+        #markdown-source.active {
+            display: block; /* Show active tab content */
+        }
+
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
     <div class="container">
         <h1>Markdown to HTML Converter</h1>
-        <textarea id="markdown-input" placeholder="Enter Markdown here..."></textarea>
-        <div id="markdown-output"></div>
-    </div>
+        <textarea id="markdown-input" placeholder="Type your Markdown here..."></textarea>
 
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css">
+        <div class="markdown-tabs" id="markdown-tabs">
+            <button data-tab="markdown-output" class="active">Rendered HTML</button>
+            <button data-tab="markdown-source">Markdown Source</button>
+        </div>
+
+        <div id="markdown-output" class="active"></div>
+        <div id="markdown-source"></div>
+    </div>
 
     <script>
         const markdownInput = document.getElementById('markdown-input');
         const markdownOutput = document.getElementById('markdown-output');
+        const markdownSource = document.getElementById('markdown-source');
+        const markdownTabs = document.getElementById('markdown-tabs');
+        let currentMarkdown = ''; // Store the current Markdown input
 
-        markdownInput.addEventListener('input', function() {
-            const markdownText = markdownInput.value;
-            const html = marked.parse(markdownText);
+        function convertMarkdown(markdown) {
+            currentMarkdown = markdown; // Update the current Markdown
+            const html = marked.parse(markdown);
             markdownOutput.innerHTML = html;
+            markdownSource.textContent = markdown;
+
+            // Syntax highlighting
             document.querySelectorAll('pre code').forEach(block => {
                 hljs.highlightBlock(block);
             });
+        }
+
+        markdownInput.addEventListener('input', function() {
+            convertMarkdown(this.value);
+        });
+
+        // Initial conversion on page load (if there's default content)
+        convertMarkdown(markdownInput.value);
+
+        // Tab switching logic
+        markdownTabs.addEventListener('click', function(e) {
+            if (e.target.tagName === 'BUTTON') {
+                // Deactivate all tabs and content
+                document.querySelectorAll('.markdown-tabs button').forEach(button => button.classList.remove('active'));
+                markdownOutput.classList.remove('active');
+                markdownSource.classList.remove('active');
+
+                // Activate the clicked tab and corresponding content
+                e.target.classList.add('active');
+                const tabId = e.target.dataset.tab;
+                document.getElementById(tabId).classList.add('active');
+
+                // Ensure the content is up to date after switching
+                if (tabId === 'markdown-source') {
+                    markdownSource.textContent = currentMarkdown; // Set the text content with currentMarkdown
+                } else {
+                    convertMarkdown(currentMarkdown);  // Re-render the output
+                }
+            }
         });
     </script>
 </body>
 </html>
-```
-
-```text
