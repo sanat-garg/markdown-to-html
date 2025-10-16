@@ -6,24 +6,22 @@ This is a simple, static web application that converts Markdown text into HTML. 
 ## Features
 - **Real-time Conversion:** Converts Markdown to HTML as you type.
 - **Syntax Highlighting:** Highlights code blocks within the Markdown input.
-- **Responsive Design:** Adapts to different screen sizes for optimal viewing.
-- **Markdown Source View:**  A tabbed interface to switch between the rendered HTML and the original Markdown source.
+- **Responsive Design:** Works well on different screen sizes.
+- **Word Count:** Displays a live word count of the Markdown input, updated after every render, and formatted with Intl.NumberFormat.
 
-## How to Use
-1.  Open `index.html` in your web browser.
-2.  Type or paste Markdown into the text area.
-3.  The HTML output is displayed in the "Rendered HTML" tab in real-time.
-4.  Switch to the "Markdown Source" tab to view the original Markdown.
+## Usage
+1.  Open `index.html` in your browser.
+2.  Type Markdown into the text area.
+3.  The converted HTML will be displayed in the output area below.
+4.  Code blocks are automatically highlighted.
+5.  The word count is displayed below the input area.
 
 ## Technologies Used
 - HTML
-- CSS (embedded)
-- JavaScript (vanilla)
-- [marked.js](https://github.com/markedjs/marked): A Markdown parser and compiler.
-- [highlight.js](https://highlightjs.org/): Syntax highlighter.
-
-## Installation
-No installation is required. Simply open `index.html` in your web browser.
+- CSS
+- JavaScript
+- [marked.js](https://github.com/markedjs/marked) for Markdown parsing.
+- [highlight.js](https://highlightjs.org/) for syntax highlighting.
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
