@@ -17,8 +17,8 @@
         .container {
             max-width: 800px;
             margin: 20px auto;
-            padding: 20px;
             background-color: #fff;
+            padding: 20px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
         }
@@ -32,20 +32,21 @@
             width: 100%;
             height: 300px;
             padding: 10px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             border: 1px solid #ddd;
             border-radius: 4px;
             box-sizing: border-box;
             font-family: monospace;
             font-size: 14px;
+            resize: vertical;
         }
 
-        #markdown-output {
+        #output {
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            margin-bottom: 20px;
             background-color: #f9f9f9;
+            overflow: auto;
         }
 
         pre {
@@ -58,173 +59,60 @@
         code {
             font-family: monospace;
         }
-
-        /* Syntax highlighting styles (using highlight.js default style) */
-        .hljs {
-            display: block;
-            overflow-x: auto;
-            padding: 0.5em;
-            background: white;
-            color: black;
-        }
-
-        .hljs-comment,
-        .hljs-quote {
-            color: #8e908c;
-        }
-
-        .hljs-variable,
-        .hljs-template-variable,
-        .hljs-attribute,
-        .hljs-tag,
-        .hljs-name,
-        .hljs-selector-id,
-        .hljs-selector-class,
-        .hljs-regexp,
-        .hljs-link {
-            color: #c82829;
-        }
-
-        .hljs-number,
-        .hljs-literal,
-        .hljs-symbol,
-        .hljs-bullet {
-            color: #f08d49;
-        }
-
-        .hljs-keyword,
-        .hljs-selector-tag {
-            color: #8959a8;
-        }
-
-        .hljs-string,
-        .hljs-title,
-        .hljs-section,
-        .hljs-built_in,
-        .hljs-doctag,
-        .hljs-type,
-        .hljs-class .hljs-title,
-        .hljs-function .hljs-title {
-            color: #718c00;
-        }
-
-        .hljs-params {
-            color: #3e999f;
-        }
-
-        .hljs-meta,
-        .hljs-meta-string {
-            color: #4271ae;
-        }
-
-        .hljs-emphasis {
-            font-style: italic;
-        }
-
-        .hljs-strong {
-            font-weight: bold;
-        }
-
-        .markdown-tabs {
-            display: flex;
+        
+        #markdown-word-count {
+            text-align: center;
+            font-size: 14px;
+            color: #777;
+            margin-top: -10px;
             margin-bottom: 10px;
         }
-
-        .markdown-tabs button {
-            padding: 10px 20px;
-            border: none;
-            background-color: #ddd;
-            cursor: pointer;
-            border-radius: 5px 5px 0 0;
-            margin-right: 5px;
-        }
-
-        .markdown-tabs button.active {
-            background-color: #fff;
-        }
-
-        #markdown-output,
-        #markdown-source {
-            border: 1px solid #ddd;
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            background-color: #f9f9f9;
-            display: none; /* Initially hide both */
-            white-space: pre-wrap;
-        }
-
-        #markdown-output.active,
-        #markdown-source.active {
-            display: block; /* Show active tab content */
-        }
-
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
     <div class="container">
         <h1>Markdown to HTML Converter</h1>
-        <textarea id="markdown-input" placeholder="Type your Markdown here..."></textarea>
-
-        <div class="markdown-tabs" id="markdown-tabs">
-            <button data-tab="markdown-output" class="active">Rendered HTML</button>
-            <button data-tab="markdown-source">Markdown Source</button>
-        </div>
-
-        <div id="markdown-output" class="active"></div>
-        <div id="markdown-source"></div>
+        <textarea id="markdown-input" placeholder="Enter Markdown here..."></textarea>
+        <div id="markdown-word-count">Word Count: 0</div>
+        <div id="output"></div>
     </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
 
     <script>
         const markdownInput = document.getElementById('markdown-input');
-        const markdownOutput = document.getElementById('markdown-output');
-        const markdownSource = document.getElementById('markdown-source');
-        const markdownTabs = document.getElementById('markdown-tabs');
-        let currentMarkdown = ''; // Store the current Markdown input
+        const outputDiv = document.getElementById('output');
+        const wordCountDiv = document.getElementById('markdown-word-count');
 
-        function convertMarkdown(markdown) {
-            currentMarkdown = markdown; // Update the current Markdown
+        const convertMarkdownToHtml = (markdown) => {
             const html = marked.parse(markdown);
-            markdownOutput.innerHTML = html;
-            markdownSource.textContent = markdown;
+            return html;
+        };
 
-            // Syntax highlighting
-            document.querySelectorAll('pre code').forEach(block => {
-                hljs.highlightBlock(block);
+        const updateOutput = () => {
+            const markdownText = markdownInput.value;
+            const htmlOutput = convertMarkdownToHtml(markdownText);
+            outputDiv.innerHTML = htmlOutput;
+            document.querySelectorAll('pre code').forEach(el => {
+                hljs.highlightElement(el);
             });
-        }
+            updateWordCount(markdownText);
+        };
 
-        markdownInput.addEventListener('input', function() {
-            convertMarkdown(this.value);
-        });
+        const updateWordCount = (text) => {
+            const words = text.trim().split(/\s+/).filter(word => word !== '');
+            const wordCount = words.length;
+            const numberFormat = new Intl.NumberFormat();
+            wordCountDiv.textContent = `Word Count: ${numberFormat.format(wordCount)}`;
+        };
 
-        // Initial conversion on page load (if there's default content)
-        convertMarkdown(markdownInput.value);
+        markdownInput.addEventListener('input', updateOutput);
 
-        // Tab switching logic
-        markdownTabs.addEventListener('click', function(e) {
-            if (e.target.tagName === 'BUTTON') {
-                // Deactivate all tabs and content
-                document.querySelectorAll('.markdown-tabs button').forEach(button => button.classList.remove('active'));
-                markdownOutput.classList.remove('active');
-                markdownSource.classList.remove('active');
-
-                // Activate the clicked tab and corresponding content
-                e.target.classList.add('active');
-                const tabId = e.target.dataset.tab;
-                document.getElementById(tabId).classList.add('active');
-
-                // Ensure the content is up to date after switching
-                if (tabId === 'markdown-source') {
-                    markdownSource.textContent = currentMarkdown; // Set the text content with currentMarkdown
-                } else {
-                    convertMarkdown(currentMarkdown);  // Re-render the output
-                }
-            }
-        });
+        // Initial render
+        updateOutput();
     </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </body>
 </html>
